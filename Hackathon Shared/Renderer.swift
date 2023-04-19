@@ -25,6 +25,11 @@ class Renderer: NSObject, MTKViewDelegate {
     public let device: MTLDevice
     let commandQueue: MTLCommandQueue
     var dynamicUniformBuffer: MTLBuffer
+    var dynamicPerInstanceUniformBuffers: [MTLBuffer] = []
+    
+    let instanceCount = 3
+    let maxInstances = 1000
+    
     var pipelineState: MTLRenderPipelineState
     var depthState: MTLDepthStencilState
     var colorMap: MTLTexture
@@ -33,9 +38,13 @@ class Renderer: NSObject, MTKViewDelegate {
     
     var uniformBufferOffset = 0
     
-    var uniformBufferIndex = 0
+    var currentFrameBufferIndex = 0
+        
+    var perInstanceUniformBufferIndex = 0
     
-    var uniforms: UnsafeMutablePointer<Uniforms>
+    var uniforms: UnsafeMutablePointer<Uniforms>!
+    
+    var perInstanceUniforms: UnsafeMutablePointer<PerInstanceUniforms>!
     
     var projectionMatrix: matrix_float4x4 = matrix_float4x4()
     
@@ -52,6 +61,12 @@ class Renderer: NSObject, MTKViewDelegate {
         
         guard let buffer = self.device.makeBuffer(length:uniformBufferSize, options:[MTLResourceOptions.storageModeShared]) else { return nil }
         dynamicUniformBuffer = buffer
+        
+        for _ in 0..<maxBuffersInFlight {
+            let perInstanceUniformBufferSize = MemoryLayout<Uniforms>.stride * maxInstances
+            let buffer = self.device.makeBuffer(length: perInstanceUniformBufferSize, options: [MTLResourceOptions.storageModeShared])!
+            dynamicPerInstanceUniformBuffers.append(buffer)
+        }
         
         self.dynamicUniformBuffer.label = "UniformBuffer"
         
@@ -191,11 +206,13 @@ class Renderer: NSObject, MTKViewDelegate {
     private func updateDynamicBufferState() {
         /// Update the state of our uniform buffers before rendering
         
-        uniformBufferIndex = (uniformBufferIndex + 1) % maxBuffersInFlight
+        currentFrameBufferIndex = (currentFrameBufferIndex + 1) % maxBuffersInFlight
         
-        uniformBufferOffset = alignedUniformsSize * uniformBufferIndex
+        uniformBufferOffset = alignedUniformsSize * currentFrameBufferIndex
         
         uniforms = UnsafeMutableRawPointer(dynamicUniformBuffer.contents() + uniformBufferOffset).bindMemory(to:Uniforms.self, capacity:1)
+        
+        perInstanceUniforms = UnsafeMutableRawPointer(dynamicPerInstanceUniformBuffers[currentFrameBufferIndex].contents()).bindMemory(to:PerInstanceUniforms.self, capacity:maxInstances)
     }
     
     private func updateGameState() {
@@ -203,10 +220,14 @@ class Renderer: NSObject, MTKViewDelegate {
         
         uniforms[0].projectionMatrix = projectionMatrix
         
-        let rotationAxis = SIMD3<Float>(1, 1, 0)
-        let modelMatrix = matrix4x4_rotation(radians: rotation, axis: rotationAxis)
-        let viewMatrix = matrix4x4_translation(0.0, 0.0, -8.0)
-        uniforms[0].modelViewMatrix = simd_mul(viewMatrix, modelMatrix)
+        for i in 0..<instanceCount {
+            
+            let rotationAxis = SIMD3<Float>(1, 1, 0)
+            let modelMatrix = matrix4x4_rotation(radians: rotation, axis: rotationAxis)
+            let viewMatrix = matrix4x4_translation(3.0 * Float(i), 0.0, -8.0)
+            
+            perInstanceUniforms![i].modelViewMatrix = simd_mul(viewMatrix, modelMatrix)
+        }
         rotation += 0.01
     }
     
@@ -245,6 +266,10 @@ class Renderer: NSObject, MTKViewDelegate {
                 
                 renderEncoder.setDepthStencilState(depthState)
                 
+                renderEncoder.setVertexBuffer(dynamicPerInstanceUniformBuffers[currentFrameBufferIndex],
+                                              offset: 0,
+                                              index: BufferIndex.perInstanceUniforms.rawValue)
+                
                 renderEncoder.setVertexBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: BufferIndex.uniforms.rawValue)
                 renderEncoder.setFragmentBuffer(dynamicUniformBuffer, offset:uniformBufferOffset, index: BufferIndex.uniforms.rawValue)
                 
@@ -266,8 +291,10 @@ class Renderer: NSObject, MTKViewDelegate {
                                                         indexCount: submesh.indexCount,
                                                         indexType: submesh.indexType,
                                                         indexBuffer: submesh.indexBuffer.buffer,
-                                                        indexBufferOffset: submesh.indexBuffer.offset)
-                    
+                                                        indexBufferOffset: submesh.indexBuffer.offset,
+                                                        instanceCount: instanceCount,
+                                                        baseVertex: 0,
+                                                        baseInstance: 0)
                 }
                 
                 renderEncoder.popDebugGroup()

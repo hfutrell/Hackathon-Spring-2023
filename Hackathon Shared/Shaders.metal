@@ -28,12 +28,14 @@ typedef struct
 } ColorInOut;
 
 vertex ColorInOut vertexShader(Vertex in [[stage_in]],
-                               constant Uniforms & uniforms [[ buffer(BufferIndexUniforms) ]])
+                               constant Uniforms & uniforms [[ buffer(BufferIndexUniforms) ]],
+                               constant PerInstanceUniforms *perInstanceUniforms [[ buffer(BufferIndexPerInstanceUniforms) ]],
+                               ushort iid [[instance_id]])
 {
     ColorInOut out;
 
     float4 position = float4(in.position, 1.0);
-    out.position = uniforms.projectionMatrix * uniforms.modelViewMatrix * position;
+    out.position = uniforms.projectionMatrix * perInstanceUniforms[iid].modelViewMatrix * position;
     out.texCoord = in.texCoord;
 
     return out;
@@ -47,7 +49,7 @@ fragment float4 fragmentShader(ColorInOut in [[stage_in]],
                                    mag_filter::linear,
                                    min_filter::linear);
 
-    half4 colorSample   = colorMap.sample(colorSampler, in.texCoord.xy);
+    half4 colorSample = colorMap.sample(colorSampler, in.texCoord.xy);
 
     return float4(colorSample);
 }
