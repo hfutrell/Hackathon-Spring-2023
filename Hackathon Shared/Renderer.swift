@@ -31,6 +31,8 @@ class Renderer: NSObject, MTKViewDelegate {
     
     var camera = Camera()
     
+    var cursor: Location? = nil
+    
     let maxInstances = 1000000
     
     var pipelineState: MTLRenderPipelineState
@@ -373,6 +375,17 @@ class Renderer: NSObject, MTKViewDelegate {
         
         let aspect = Float(size.width) / Float(size.height)
         projectionMatrix = matrix_perspective_right_hand(fovyRadians: radians_from_degrees(30), aspectRatio:aspect, nearZ: 1.0, farZ: 1000.0)
+    }
+}
+
+extension Renderer: MouseControlsDelegate {
+    func mouseMoved(to viewPoint: CGPoint?) {
+        guard let viewPoint else {
+            print("no mouse")
+            cursor = nil
+            return
+        }
+        print("mouse moved to \(viewPoint)")
     }
 }
 

@@ -13,7 +13,8 @@ class GameViewController: UIViewController {
     
     var renderer: Renderer!
     var mtkView: MTKView!
-    let keyboardControls = KeyboardControls()
+    var keyboardControls: KeyboardControls!
+    var mouseControls: MouseControls!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,12 +38,25 @@ class GameViewController: UIViewController {
             return
         }
         
-        renderer = newRenderer
-        renderer.keyboardControls = keyboardControls
         
+        renderer = newRenderer
+        
+        keyboardControls = KeyboardControls()
+        mouseControls = MouseControls(view: view)
+        
+        mouseControls.delegate = renderer
+        renderer.keyboardControls = keyboardControls
+
         renderer.mtkView(mtkView, drawableSizeWillChange: mtkView.drawableSize)
 
+        let hoverGesture = UIHoverGestureRecognizer(target: self, action: #selector(handleHover))
+        self.view.addGestureRecognizer(hoverGesture)
+        
         mtkView.delegate = renderer
+    }
+    
+    @objc func handleHover(_ recognizer: UIHoverGestureRecognizer) {
+        mouseControls.handleHover(recognizer)
     }
     
     override func pressesBegan(_ presses: Set<UIPress>,
@@ -59,5 +73,4 @@ class GameViewController: UIViewController {
                                    with event: UIPressesEvent?) {
         keyboardControls.pressesEnded(presses, with: event)
     }
-
 }

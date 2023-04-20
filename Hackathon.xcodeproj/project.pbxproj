@@ -28,6 +28,8 @@
 		FD6641FB29F0C4E900EA5C0A /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD6641F929F0C4E900EA5C0A /* Camera.swift */; };
 		FD6641FD29F1B8A100EA5C0A /* KeyboardControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD6641FC29F1B8A100EA5C0A /* KeyboardControls.swift */; };
 		FD6641FE29F1B8A100EA5C0A /* KeyboardControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD6641FC29F1B8A100EA5C0A /* KeyboardControls.swift */; };
+		FD66420029F1CD5A00EA5C0A /* MouseControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD6641FF29F1CD5A00EA5C0A /* MouseControls.swift */; };
+		FD66420129F1CD5A00EA5C0A /* MouseControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD6641FF29F1CD5A00EA5C0A /* MouseControls.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +50,7 @@
 		FD23445E29F0B8BD0074BE2B /* GameWorld.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameWorld.swift; sourceTree = "<group>"; };
 		FD6641F929F0C4E900EA5C0A /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 		FD6641FC29F1B8A100EA5C0A /* KeyboardControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardControls.swift; sourceTree = "<group>"; };
+		FD6641FF29F1CD5A00EA5C0A /* MouseControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseControls.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,6 +91,7 @@
 				FD23445E29F0B8BD0074BE2B /* GameWorld.swift */,
 				FD6641F929F0C4E900EA5C0A /* Camera.swift */,
 				FD6641FC29F1B8A100EA5C0A /* KeyboardControls.swift */,
+				FD6641FF29F1CD5A00EA5C0A /* MouseControls.swift */,
 			);
 			path = "Hackathon Shared";
 			sourceTree = "<group>";
@@ -229,6 +233,7 @@
 				FD23445029F07C150074BE2B /* Renderer.swift in Sources */,
 				FD23444E29F07C150074BE2B /* Shaders.metal in Sources */,
 				FD6641FA29F0C4E900EA5C0A /* Camera.swift in Sources */,
+				FD66420029F1CD5A00EA5C0A /* MouseControls.swift in Sources */,
 				FD23443929F07C150074BE2B /* GameViewController.swift in Sources */,
 				FD6641FD29F1B8A100EA5C0A /* KeyboardControls.swift in Sources */,
 				FD23443729F07C150074BE2B /* AppDelegate.swift in Sources */,
@@ -243,6 +248,7 @@
 				FD23445129F07C150074BE2B /* Renderer.swift in Sources */,
 				FD23444F29F07C150074BE2B /* Shaders.metal in Sources */,
 				FD6641FB29F0C4E900EA5C0A /* Camera.swift in Sources */,
+				FD66420129F1CD5A00EA5C0A /* MouseControls.swift in Sources */,
 				FD23444929F07C150074BE2B /* GameViewController.swift in Sources */,
 				FD6641FE29F1B8A100EA5C0A /* KeyboardControls.swift in Sources */,
 				FD23444729F07C150074BE2B /* AppDelegate.swift in Sources */,
