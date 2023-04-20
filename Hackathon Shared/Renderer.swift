@@ -29,6 +29,8 @@ class Renderer: NSObject, MTKViewDelegate {
     
     let gameWorld = GameWorld()
     
+    var camera = Camera()
+    
     let maxInstances = 1000000
     
     var pipelineState: MTLRenderPipelineState
@@ -117,6 +119,8 @@ class Renderer: NSObject, MTKViewDelegate {
                 gameWorld.insertCube(at: Location(x: i, y: (j+i) % 2, z: j))
             }
         }
+        
+        camera.move(to: SIMD3(50, 5, 60))
         
         super.init()
         
@@ -241,7 +245,10 @@ class Renderer: NSObject, MTKViewDelegate {
             defer { i += 1 }
             let rotationAxis = SIMD3<Float>(1, 1, 0)
             let modelMatrix = matrix_float4x4.init(1)
-            let viewMatrix = matrix4x4_translation(Float(location.x), Float(location.y) - 4, Float(location.z))
+            
+            let cameraTranslation = camera.matrix.columns.3
+            
+            let viewMatrix = matrix4x4_translation(Float(location.x) + cameraTranslation.x, Float(location.y) + cameraTranslation.y, Float(location.z) + cameraTranslation.z)
             
             perInstanceUniforms![i].modelViewMatrix = simd_mul(viewMatrix, modelMatrix)
         }
