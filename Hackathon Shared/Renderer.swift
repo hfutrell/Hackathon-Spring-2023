@@ -29,7 +29,9 @@ class Renderer: NSObject, MTKViewDelegate {
     
     let gameWorld = GameWorld()
     
-    var camera = Camera()
+    var camera = Camera(fovRadians: radians_from_degrees(30),
+                        nearZ: 1,
+                        farZ: 100)
     
     var cursor: Location? = nil
     
@@ -50,8 +52,8 @@ class Renderer: NSObject, MTKViewDelegate {
     var uniforms: UnsafeMutablePointer<Uniforms>!
     
     var perInstanceUniforms: UnsafeMutablePointer<PerInstanceUniforms>!
-    
-    var projectionMatrix: matrix_float4x4 = matrix_float4x4()
+        
+    var aspectRatio: Float!
     
     var rotation: Float = 0
     
@@ -250,7 +252,7 @@ class Renderer: NSObject, MTKViewDelegate {
     private func updateGameState() {
         /// Update any game state before rendering
         
-        uniforms[0].projectionMatrix = projectionMatrix
+        uniforms[0].projectionMatrix = camera.projectionMatrix(aspectRatio: aspectRatio)
         
         var i = 0
         for (location, _) in gameWorld.allObjects {
@@ -369,12 +371,10 @@ class Renderer: NSObject, MTKViewDelegate {
             commandBuffer.commit()
         }
     }
-    
+        
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         /// Respond to drawable size or orientation changes here
-        
-        let aspect = Float(size.width) / Float(size.height)
-        projectionMatrix = matrix_perspective_right_hand(fovyRadians: radians_from_degrees(30), aspectRatio:aspect, nearZ: 1.0, farZ: 1000.0)
+        aspectRatio = Float(size.width) / Float(size.height)
     }
 }
 
@@ -407,16 +407,6 @@ func matrix4x4_translation(_ translationX: Float, _ translationY: Float, _ trans
                                          vector_float4(0, 1, 0, 0),
                                          vector_float4(0, 0, 1, 0),
                                          vector_float4(translationX, translationY, translationZ, 1)))
-}
-
-func matrix_perspective_right_hand(fovyRadians fovy: Float, aspectRatio: Float, nearZ: Float, farZ: Float) -> matrix_float4x4 {
-    let ys = 1 / tanf(fovy * 0.5)
-    let xs = ys / aspectRatio
-    let zs = farZ / (nearZ - farZ)
-    return matrix_float4x4.init(columns:(vector_float4(xs,  0, 0,   0),
-                                         vector_float4( 0, ys, 0,   0),
-                                         vector_float4( 0,  0, zs, -1),
-                                         vector_float4( 0,  0, zs * nearZ, 0)))
 }
 
 func radians_from_degrees(_ degrees: Float) -> Float {
