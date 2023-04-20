@@ -27,7 +27,8 @@ class Renderer: NSObject, MTKViewDelegate {
     var dynamicUniformBuffer: MTLBuffer
     var dynamicPerInstanceUniformBuffers: [MTLBuffer] = []
     
-    let instanceCount = 3
+    let gameWorld = GameWorld()
+    
     let maxInstances = 1000
     
     var pipelineState: MTLRenderPipelineState
@@ -107,6 +108,10 @@ class Renderer: NSObject, MTKViewDelegate {
             return nil
         }
         
+        gameWorld.insertCube(at: Location(x: 0, y: 0, z: 0))
+        gameWorld.insertCube(at: Location(x: -1, y: 1, z: 0))
+        gameWorld.insertCube(at: Location(x: 1, y: 1, z: 0))
+
         super.init()
         
     }
@@ -166,7 +171,7 @@ class Renderer: NSObject, MTKViewDelegate {
         
         let metalAllocator = MTKMeshBufferAllocator(device: device)
         
-        let mdlMesh = MDLMesh.newBox(withDimensions: SIMD3<Float>(4, 4, 4),
+        let mdlMesh = MDLMesh.newBox(withDimensions: SIMD3<Float>(1, 1, 1),
                                      segments: SIMD3<UInt32>(2, 2, 2),
                                      geometryType: MDLGeometryType.triangles,
                                      inwardNormals:false,
@@ -220,11 +225,12 @@ class Renderer: NSObject, MTKViewDelegate {
         
         uniforms[0].projectionMatrix = projectionMatrix
         
-        for i in 0..<instanceCount {
-            
+        var i = 0
+        for (location, _) in gameWorld.allObjects {
+            defer { i += 1 }
             let rotationAxis = SIMD3<Float>(1, 1, 0)
             let modelMatrix = matrix4x4_rotation(radians: rotation, axis: rotationAxis)
-            let viewMatrix = matrix4x4_translation(3.0 * Float(i), 0.0, -8.0)
+            let viewMatrix = matrix4x4_translation(Float(location.x), Float(location.y), -8.0 + Float(location.z))
             
             perInstanceUniforms![i].modelViewMatrix = simd_mul(viewMatrix, modelMatrix)
         }
@@ -286,15 +292,19 @@ class Renderer: NSObject, MTKViewDelegate {
                 
                 renderEncoder.setFragmentTexture(colorMap, index: TextureIndex.color.rawValue)
                 
-                for submesh in mesh.submeshes {
-                    renderEncoder.drawIndexedPrimitives(type: submesh.primitiveType,
-                                                        indexCount: submesh.indexCount,
-                                                        indexType: submesh.indexType,
-                                                        indexBuffer: submesh.indexBuffer.buffer,
-                                                        indexBufferOffset: submesh.indexBuffer.offset,
-                                                        instanceCount: instanceCount,
-                                                        baseVertex: 0,
-                                                        baseInstance: 0)
+                if gameWorld.allObjects.isEmpty == false {
+                    
+                    for submesh in mesh.submeshes {
+                        renderEncoder.drawIndexedPrimitives(type: submesh.primitiveType,
+                                                            indexCount: submesh.indexCount,
+                                                            indexType: submesh.indexType,
+                                                            indexBuffer: submesh.indexBuffer.buffer,
+                                                            indexBufferOffset: submesh.indexBuffer.offset,
+                                                            instanceCount: gameWorld.allObjects.count,
+                                                            baseVertex: 0,
+                                                            baseInstance: 0)
+                    }
+                    
                 }
                 
                 renderEncoder.popDebugGroup()

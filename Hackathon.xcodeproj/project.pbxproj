@@ -22,6 +22,8 @@
 		FD23445329F07C150074BE2B /* ShaderTypes.h in Resources */ = {isa = PBXBuildFile; fileRef = FD23442D29F07C140074BE2B /* ShaderTypes.h */; };
 		FD23445429F07C150074BE2B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FD23442E29F07C150074BE2B /* Assets.xcassets */; };
 		FD23445529F07C150074BE2B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FD23442E29F07C150074BE2B /* Assets.xcassets */; };
+		FD23445F29F0B8BD0074BE2B /* GameWorld.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD23445E29F0B8BD0074BE2B /* GameWorld.swift */; };
+		FD23446029F0B8BD0074BE2B /* GameWorld.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD23445E29F0B8BD0074BE2B /* GameWorld.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +41,7 @@
 		FD23444829F07C150074BE2B /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		FD23444B29F07C150074BE2B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		FD23444D29F07C150074BE2B /* Hackathon_macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Hackathon_macOS.entitlements; sourceTree = "<group>"; };
+		FD23445E29F0B8BD0074BE2B /* GameWorld.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameWorld.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +79,7 @@
 				FD23442C29F07C140074BE2B /* Renderer.swift */,
 				FD23442D29F07C140074BE2B /* ShaderTypes.h */,
 				FD23442E29F07C150074BE2B /* Assets.xcassets */,
+				FD23445E29F0B8BD0074BE2B /* GameWorld.swift */,
 			);
 			path = "Hackathon Shared";
 			sourceTree = "<group>";
@@ -218,6 +222,7 @@
 				FD23444E29F07C150074BE2B /* Shaders.metal in Sources */,
 				FD23443929F07C150074BE2B /* GameViewController.swift in Sources */,
 				FD23443729F07C150074BE2B /* AppDelegate.swift in Sources */,
+				FD23445F29F0B8BD0074BE2B /* GameWorld.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -229,6 +234,7 @@
 				FD23444F29F07C150074BE2B /* Shaders.metal in Sources */,
 				FD23444929F07C150074BE2B /* GameViewController.swift in Sources */,
 				FD23444729F07C150074BE2B /* AppDelegate.swift in Sources */,
+				FD23446029F0B8BD0074BE2B /* GameWorld.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
