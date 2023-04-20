@@ -29,7 +29,7 @@ class Renderer: NSObject, MTKViewDelegate {
     
     let gameWorld = GameWorld()
     
-    let maxInstances = 1000
+    let maxInstances = 1000000
     
     var pipelineState: MTLRenderPipelineState
     var depthState: MTLDepthStencilState
@@ -108,10 +108,12 @@ class Renderer: NSObject, MTKViewDelegate {
             return nil
         }
         
-        gameWorld.insertCube(at: Location(x: 0, y: 0, z: 0))
-        gameWorld.insertCube(at: Location(x: -1, y: 1, z: 0))
-        gameWorld.insertCube(at: Location(x: 1, y: 1, z: 0))
-
+        for i in -50...50 {
+            for j in -50...50 {
+                gameWorld.insertCube(at: Location(x: i, y: (j+i) % 2, z: j))
+            }
+        }
+        
         super.init()
         
     }
@@ -229,8 +231,8 @@ class Renderer: NSObject, MTKViewDelegate {
         for (location, _) in gameWorld.allObjects {
             defer { i += 1 }
             let rotationAxis = SIMD3<Float>(1, 1, 0)
-            let modelMatrix = matrix4x4_rotation(radians: rotation, axis: rotationAxis)
-            let viewMatrix = matrix4x4_translation(Float(location.x), Float(location.y), -8.0 + Float(location.z))
+            let modelMatrix = matrix_float4x4.init(1)
+            let viewMatrix = matrix4x4_translation(Float(location.x), Float(location.y) - 4, Float(location.z))
             
             perInstanceUniforms![i].modelViewMatrix = simd_mul(viewMatrix, modelMatrix)
         }
