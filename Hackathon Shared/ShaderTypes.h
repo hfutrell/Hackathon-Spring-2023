@@ -33,6 +33,7 @@ typedef NS_ENUM(EnumBackingType, VertexAttribute)
 {
     VertexAttributePosition  = 0,
     VertexAttributeTexcoord  = 1,
+    VertexAttributeNormal    = 2
 };
 
 typedef NS_ENUM(EnumBackingType, TextureIndex)

@@ -19,12 +19,14 @@ typedef struct
 {
     float3 position [[attribute(VertexAttributePosition)]];
     float2 texCoord [[attribute(VertexAttributeTexcoord)]];
+    float3 normal   [[attribute(VertexAttributeNormal)]];
 } Vertex;
 
 typedef struct
 {
     float4 position [[position]];
     float2 texCoord;
+    float3 color;
 } ColorInOut;
 
 vertex ColorInOut vertexShader(Vertex in [[stage_in]],
@@ -38,6 +40,10 @@ vertex ColorInOut vertexShader(Vertex in [[stage_in]],
     out.position = uniforms.projectionMatrix * perInstanceUniforms[iid].modelViewMatrix * position;
     out.texCoord = in.texCoord;
 
+    float3 light = { 0.4, 0.8, 1.0 };
+    
+    out.color = max(dot(in.normal, light), 0.0) * float3(1.0, 1.0, 1.0) + float3(0.4, 0.1, 0.0);
+    
     return out;
 }
 
@@ -45,11 +51,5 @@ fragment float4 fragmentShader(ColorInOut in [[stage_in]],
                                constant Uniforms & uniforms [[ buffer(BufferIndexUniforms) ]],
                                texture2d<half> colorMap     [[ texture(TextureIndexColor) ]])
 {
-    constexpr sampler colorSampler(mip_filter::linear,
-                                   mag_filter::linear,
-                                   min_filter::linear);
-
-    half4 colorSample = colorMap.sample(colorSampler, in.texCoord.xy);
-
-    return float4(colorSample);
+    return float4(in.color, 1.0);
 }
