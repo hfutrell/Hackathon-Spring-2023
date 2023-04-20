@@ -116,11 +116,19 @@ class Renderer: NSObject, MTKViewDelegate {
         
         for i in -50...50 {
             for j in -50...50 {
-                gameWorld.insertCube(at: Location(x: i, y: (j+i) % 2, z: j))
+                gameWorld.insertCube(at: Location(x: i, y: (j+i+100) % 2, z: j))
             }
         }
         
-        camera.move(to: SIMD3(50, 5, 60))
+        gameWorld.insertCube(at: Location(x: 0, y: 10, z: -70))
+        gameWorld.insertCube(at: Location(x: 10, y: 40, z: -70))
+        gameWorld.insertCube(at: Location(x: 40, y: 20, z: -70))
+
+        gameWorld.insertCube(at: Location(x: 40, y: 20, z: 70))
+
+        camera.move(to: SIMD3(0, 4, 0))
+        
+        camera.look(at: SIMD3(40, 20, 70))
         
         super.init()
         
@@ -243,13 +251,15 @@ class Renderer: NSObject, MTKViewDelegate {
         var i = 0
         for (location, _) in gameWorld.allObjects {
             defer { i += 1 }
-            let rotationAxis = SIMD3<Float>(1, 1, 0)
-            let modelMatrix = matrix_float4x4.init(1)
-            
-            let cameraTranslation = camera.matrix.columns.3
-            
-            let viewMatrix = matrix4x4_translation(Float(location.x) + cameraTranslation.x, Float(location.y) + cameraTranslation.y, Float(location.z) + cameraTranslation.z)
-            
+
+            let modelMatrix = matrix4x4_translation(Float(location.x), Float(location.y), Float(location.z))
+                        
+            var viewMatrix = matrix_float4x4()
+            viewMatrix.columns.0 = SIMD4<Float>(camera.matrix.columns.0, 0.0)
+            viewMatrix.columns.1 = SIMD4<Float>(camera.matrix.columns.1, 0.0)
+            viewMatrix.columns.2 = SIMD4<Float>(camera.matrix.columns.2, 0.0)
+            viewMatrix.columns.3 = SIMD4<Float>(camera.matrix.columns.3, 1.0)
+
             perInstanceUniforms![i].modelViewMatrix = simd_mul(viewMatrix, modelMatrix)
         }
         rotation += 0.01

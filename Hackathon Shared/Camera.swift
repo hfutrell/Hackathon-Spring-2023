@@ -15,4 +15,18 @@ struct Camera {
         matrix.columns.3 = -location
     }
     var location: SIMD3<Float> { return -matrix.columns.3 }
+    mutating func look(at location: SIMD3<Float>) {
+
+        let up = SIMD3<Float>(0, 1, 0)
+        
+        var zaxis: SIMD3<Float> = normalize(location - self.location)
+        let xaxis: SIMD3<Float> = normalize(cross(zaxis, up))
+        let yaxis: SIMD3<Float> = cross(xaxis, zaxis)
+       
+        zaxis *= -1
+
+        matrix.columns.0 = SIMD3(xaxis.x, yaxis.x, zaxis.x)
+        matrix.columns.1 = SIMD3(xaxis.y, yaxis.y, zaxis.y)
+        matrix.columns.2 = SIMD3(xaxis.z, yaxis.z, zaxis.z)
+    }
 }
