@@ -10,25 +10,41 @@ import Foundation
 import simd
 
 struct Camera {
-    var matrix: simd_float4x3 = simd_float4x3(1.0)
-    mutating func move(to location: SIMD3<Float>) {
-        matrix.columns.3 = -location
+    
+    /// the location of the camera in world-space
+    var location: SIMD3<Float> = .zero
+   
+    /// the x, y, and z axis of the camera in world-space
+    var axis: simd_float3x3 = simd_float3x3(1.0)
+    
+    /// the rotation matrix of the camera
+    var rotation: simd_float3x3 { axis.transpose }
+    
+    /// the view matrix of the camera
+    var matrix: simd_float4x3 {
+        return simd_float4x3(rotation.columns.0,
+                             rotation.columns.1,
+                             rotation.columns.2,
+                             -rotation * location)
     }
-    var location: SIMD3<Float> { return -matrix.columns.3 }
+    
+    private let up = SIMD3<Float>(0, 1, 0)
+    
     mutating func look(at location: SIMD3<Float>) {
 
-        let up = SIMD3<Float>(0, 1, 0)
-        
         var zaxis = normalize(location - self.location)
         let xaxis = normalize(cross(zaxis, up))
         let yaxis = cross(xaxis, zaxis)
         zaxis *= -1
 
-        let rotationMatrix = matrix_float3x3(xaxis, yaxis, zaxis).transpose
-
-        matrix = matrix_float4x3(rotationMatrix.columns.0,
-                                 rotationMatrix.columns.1,
-                                 rotationMatrix.columns.2,
-                                 matrix.columns.3)
+        axis = matrix_float3x3(xaxis, yaxis, zaxis)
     }
+            
+    private var panForwardDirection: SIMD3<Float> { return -cross(rotation.transpose.columns.0, up) }
+    private var panRightDirection: SIMD3<Float> { return rotation.transpose.columns.0 }
+
+    mutating func panFoward(amount: Float) { location += amount * panForwardDirection }
+    mutating func panBackward(amount: Float) { location -= amount * panForwardDirection }
+    mutating func panLeft(amount: Float) { location -= amount * panRightDirection }
+    mutating func panRight(amount: Float) { location += amount * panRightDirection }
 }

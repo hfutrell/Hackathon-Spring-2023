@@ -55,6 +55,8 @@ class Renderer: NSObject, MTKViewDelegate {
     
     var mesh: MTKMesh
     
+    var keyboardControls: KeyboardControls!
+    
     init?(metalKitView: MTKView) {
         let device = metalKitView.device!
         self.device = device
@@ -126,9 +128,9 @@ class Renderer: NSObject, MTKViewDelegate {
 
         gameWorld.insertCube(at: Location(x: 40, y: 20, z: 70))
 
-        camera.move(to: SIMD3(0, 4, 0))
+        camera.location = SIMD3(0, 4, 0)
         
-        camera.look(at: SIMD3(40, 20, 70))
+        camera.look(at: SIMD3(10, 1, -70))
         
         super.init()
         
@@ -265,8 +267,26 @@ class Renderer: NSObject, MTKViewDelegate {
         rotation += 0.01
     }
     
+    func handleControls() {
+        let movementSpeed: Float = 0.05
+        if keyboardControls.isKeyDown(.keyboardLeftArrow) {
+            camera.panLeft(amount: movementSpeed)
+        }
+        if keyboardControls.isKeyDown(.keyboardRightArrow) {
+            camera.panRight(amount: movementSpeed)
+        }
+        if keyboardControls.isKeyDown(.keyboardUpArrow) {
+            camera.panFoward(amount: movementSpeed)
+        }
+        if keyboardControls.isKeyDown(.keyboardDownArrow) {
+            camera.panBackward(amount: movementSpeed)
+        }
+    }
+    
     func draw(in view: MTKView) {
         /// Per frame updates hare
+        
+        handleControls()
         
         _ = inFlightSemaphore.wait(timeout: DispatchTime.distantFuture)
         
