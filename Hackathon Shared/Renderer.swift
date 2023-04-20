@@ -128,9 +128,9 @@ class Renderer: NSObject, MTKViewDelegate {
 
         gameWorld.insertCube(at: Location(x: 40, y: 20, z: 70))
 
-        camera.location = SIMD3(0, 4, 0)
+        camera.location = SIMD3(40, 50, 30)
         
-        camera.look(at: SIMD3(10, 1, -70))
+        camera.look(at: SIMD3(0, 0, 0))
         
         super.init()
         
@@ -268,7 +268,7 @@ class Renderer: NSObject, MTKViewDelegate {
     }
     
     func handleControls() {
-        let movementSpeed: Float = 0.05
+        let movementSpeed: Float = 0.3
         if keyboardControls.isKeyDown(.keyboardLeftArrow) {
             camera.panLeft(amount: movementSpeed)
         }
@@ -372,7 +372,7 @@ class Renderer: NSObject, MTKViewDelegate {
         /// Respond to drawable size or orientation changes here
         
         let aspect = Float(size.width) / Float(size.height)
-        projectionMatrix = matrix_perspective_right_hand(fovyRadians: radians_from_degrees(65), aspectRatio:aspect, nearZ: 0.1, farZ: 100.0)
+        projectionMatrix = matrix_perspective_right_hand(fovyRadians: radians_from_degrees(30), aspectRatio:aspect, nearZ: 1.0, farZ: 1000.0)
     }
 }
 
