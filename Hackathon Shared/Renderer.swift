@@ -75,7 +75,7 @@ class Renderer: NSObject, MTKViewDelegate {
         
         metalKitView.depthStencilPixelFormat = MTLPixelFormat.depth32Float_stencil8
         metalKitView.colorPixelFormat = MTLPixelFormat.bgra8Unorm_srgb
-        metalKitView.sampleCount = 1
+        metalKitView.sampleCount = 4
         
         let mtlVertexDescriptor = Renderer.buildMetalVertexDescriptor()
         
