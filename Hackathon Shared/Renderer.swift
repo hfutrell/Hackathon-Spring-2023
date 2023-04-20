@@ -54,7 +54,8 @@ class Renderer: NSObject, MTKViewDelegate {
     var mesh: MTKMesh
     
     init?(metalKitView: MTKView) {
-        self.device = metalKitView.device!
+        let device = metalKitView.device!
+        self.device = device
         guard let queue = self.device.makeCommandQueue() else { return nil }
         self.commandQueue = queue
         
@@ -75,7 +76,10 @@ class Renderer: NSObject, MTKViewDelegate {
         
         metalKitView.depthStencilPixelFormat = MTLPixelFormat.depth32Float_stencil8
         metalKitView.colorPixelFormat = MTLPixelFormat.bgra8Unorm_srgb
-        metalKitView.sampleCount = 4
+        
+        let sampleCounts = [2, 4, 8]
+        let supportedSampleCounts = sampleCounts.filter { device.supportsTextureSampleCount($0) }
+        metalKitView.sampleCount = supportedSampleCounts.max() ?? 1
         
         let mtlVertexDescriptor = Renderer.buildMetalVertexDescriptor()
         
