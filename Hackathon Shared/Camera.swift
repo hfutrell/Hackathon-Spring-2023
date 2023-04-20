@@ -19,14 +19,16 @@ struct Camera {
 
         let up = SIMD3<Float>(0, 1, 0)
         
-        var zaxis: SIMD3<Float> = normalize(location - self.location)
-        let xaxis: SIMD3<Float> = normalize(cross(zaxis, up))
-        let yaxis: SIMD3<Float> = cross(xaxis, zaxis)
-       
+        var zaxis = normalize(location - self.location)
+        let xaxis = normalize(cross(zaxis, up))
+        let yaxis = cross(xaxis, zaxis)
         zaxis *= -1
 
-        matrix.columns.0 = SIMD3(xaxis.x, yaxis.x, zaxis.x)
-        matrix.columns.1 = SIMD3(xaxis.y, yaxis.y, zaxis.y)
-        matrix.columns.2 = SIMD3(xaxis.z, yaxis.z, zaxis.z)
+        let rotationMatrix = matrix_float3x3(xaxis, yaxis, zaxis).transpose
+
+        matrix = matrix_float4x3(rotationMatrix.columns.0,
+                                 rotationMatrix.columns.1,
+                                 rotationMatrix.columns.2,
+                                 matrix.columns.3)
     }
 }
