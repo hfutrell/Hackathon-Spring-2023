@@ -31,7 +31,9 @@ class Renderer: NSObject, MTKViewDelegate {
     
     var camera = Camera(fovRadians: radians_from_degrees(30),
                         nearZ: 1,
-                        farZ: 100)
+                        farZ: 200)
+    
+    var objectInstances: [GameObject] = []
     
     var cursor: Location? = nil
     let maxInstances = 1000000
@@ -263,8 +265,10 @@ class Renderer: NSObject, MTKViewDelegate {
         }
         objects += gameWorld.allObjects.map({ $0.1 })
         
+        objectInstances = objects
+        
         var i = 0
-        for object in objects {
+        for object in objectInstances {
             defer { i += 1 }
 
             let location = object.location
@@ -359,7 +363,7 @@ class Renderer: NSObject, MTKViewDelegate {
                                                             indexType: submesh.indexType,
                                                             indexBuffer: submesh.indexBuffer.buffer,
                                                             indexBufferOffset: submesh.indexBuffer.offset,
-                                                            instanceCount: gameWorld.allObjects.count,
+                                                            instanceCount: objectInstances.count,
                                                             baseVertex: 0,
                                                             baseInstance: 0)
                     }
