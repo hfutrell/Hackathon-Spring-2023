@@ -9,7 +9,7 @@ import UIKit
 
 protocol MouseControlsDelegate: AnyObject {
     func mouseMoved(to viewPoint: CGPoint?, in view: UIView)
-    // func mouseClicked(at viewPoint: CGPoint, isRightClick: Bool)
+    func mouseClicked(at viewPoint: CGPoint, isRightClick: Bool)
 }
 
 class MouseControls {
@@ -32,6 +32,13 @@ class MouseControls {
         @unknown default:
             assertionFailure("unhandled hover state \(recognizer.state)")
             break
+        }
+    }
+    
+    func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        touches.forEach {
+            #warning("need to determine right click")
+            delegate?.mouseClicked(at: $0.location(in: view), isRightClick: false)
         }
     }
 }

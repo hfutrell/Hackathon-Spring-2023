@@ -73,4 +73,8 @@ class GameViewController: UIViewController {
                                    with event: UIPressesEvent?) {
         keyboardControls.pressesEnded(presses, with: event)
     }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        mouseControls.touchesEnded(touches, with: event)
+    }
 }

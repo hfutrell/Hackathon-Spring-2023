@@ -130,7 +130,7 @@ class Renderer: NSObject, MTKViewDelegate {
             for j in -50...50 {
                 let even = (j+i+100) % 2 == 0
                 
-                let y = Int(sin(Float(i) / 10) * 3 + cos(Float(j) / 10) * 2)
+                let y = Int(sin(Float(i) / 20) * 3 + cos(Float(j) / 50) * 2)
                 
                 gameWorld.insertCube(at: Location(x: i, y: y, z: j), color: even ? color1 : color2)
             }
@@ -391,6 +391,11 @@ class Renderer: NSObject, MTKViewDelegate {
 }
 
 extension Renderer: MouseControlsDelegate {
+    
+    func mouseClicked(at viewPoint: CGPoint, isRightClick: Bool) {
+        guard let cursor else { return }
+        gameWorld.insertCube(at: cursor, color: UIColor.gray)
+    }
     
     func mouseMoved(to viewPoint: CGPoint?, in view: UIView) {
         guard let viewPoint else {
