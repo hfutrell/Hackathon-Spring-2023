@@ -44,6 +44,16 @@ struct Camera {
                              -rotation * location)
     }
     
+    var viewMatrix: matrix_float4x4 {
+        let matrix = self.matrix
+        return matrix_float4x4(SIMD4<Float>(matrix.columns.0, 0.0),
+                               SIMD4<Float>(matrix.columns.1, 0.0),
+                               SIMD4<Float>(matrix.columns.2, 0.0),
+                               SIMD4<Float>(matrix.columns.3, 1.0)
+        )
+    }
+
+    
     private let up = SIMD3<Float>(0, 1, 0)
     
     mutating func look(at location: SIMD3<Float>) {

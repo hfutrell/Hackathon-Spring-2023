@@ -53,7 +53,9 @@ class Renderer: NSObject, MTKViewDelegate {
     
     var perInstanceUniforms: UnsafeMutablePointer<PerInstanceUniforms>!
         
-    var aspectRatio: Float!
+    var drawableWidth: Float!
+    var drawableHeight: Float!
+    var aspectRatio: Float { return drawableWidth / drawableHeight }
     
     var rotation: Float = 0
     
@@ -260,13 +262,7 @@ class Renderer: NSObject, MTKViewDelegate {
 
             let modelMatrix = matrix4x4_translation(Float(location.x), Float(location.y), Float(location.z))
                         
-            var viewMatrix = matrix_float4x4()
-            viewMatrix.columns.0 = SIMD4<Float>(camera.matrix.columns.0, 0.0)
-            viewMatrix.columns.1 = SIMD4<Float>(camera.matrix.columns.1, 0.0)
-            viewMatrix.columns.2 = SIMD4<Float>(camera.matrix.columns.2, 0.0)
-            viewMatrix.columns.3 = SIMD4<Float>(camera.matrix.columns.3, 1.0)
-
-            perInstanceUniforms![i].modelViewMatrix = simd_mul(viewMatrix, modelMatrix)
+            perInstanceUniforms![i].modelViewMatrix = simd_mul(camera.viewMatrix, modelMatrix)
         }
         rotation += 0.01
     }
@@ -374,18 +370,42 @@ class Renderer: NSObject, MTKViewDelegate {
         
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         /// Respond to drawable size or orientation changes here
-        aspectRatio = Float(size.width) / Float(size.height)
+        drawableWidth = Float(size.width)
+        drawableHeight = Float(size.height)
     }
 }
 
 extension Renderer: MouseControlsDelegate {
-    func mouseMoved(to viewPoint: CGPoint?) {
+    
+    func mouseMoved(to viewPoint: CGPoint?, in view: UIView) {
         guard let viewPoint else {
             print("no mouse")
             cursor = nil
             return
         }
-        print("mouse moved to \(viewPoint)")
+        
+        let viewWidth = Float(view.bounds.size.width)
+        let viewHeight = Float(view.bounds.size.height)
+        
+        let clipX: Float = 2.0 * Float(viewPoint.x) / viewWidth - 1.0
+        let clipY: Float = 2.0 * (viewHeight - Float(viewPoint.y)) / viewHeight - 1.0
+        let clipZ: Float = 1.0
+        let clipW: Float = 1.0
+        
+        let clipCoordinates = SIMD4<Float>(x: clipX, y: clipY, z: clipZ, w: clipW)
+        
+        let vector4 = simd_mul(camera.projectionMatrix(aspectRatio: aspectRatio).inverse, clipCoordinates)
+        let vector = normalize(1.0 / vector4.w * SIMD3<Float>(x: vector4.x, y: vector4.y, z: vector4.z))
+                
+        let point = Float(50.0) * vector
+        
+        var testLocation = simd_mul(camera.viewMatrix.inverse, SIMD4<Float>(point, 1.0))
+        testLocation /= testLocation.w
+        
+        gameWorld.insertCube(at: Location(x: Int(testLocation.x.rounded()),
+                                          y: Int(testLocation.y.rounded()),
+                                          z: Int(testLocation.z.rounded())))
+        
     }
 }
 
