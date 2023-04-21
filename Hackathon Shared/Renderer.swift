@@ -34,7 +34,6 @@ class Renderer: NSObject, MTKViewDelegate {
                         farZ: 100)
     
     var cursor: Location? = nil
-    
     let maxInstances = 1000000
     
     var pipelineState: MTLRenderPipelineState
@@ -128,7 +127,10 @@ class Renderer: NSObject, MTKViewDelegate {
         for i in -50...50 {
             for j in -50...50 {
                 let even = (j+i+100) % 2 == 0
-                gameWorld.insertCube(at: Location(x: i, y: even ? 0 : 1, z: j), color: even ? color1 : color2)
+                
+                let y = Int(sin(Float(i) / 10) * 3 + cos(Float(j) / 10) * 2)
+                
+                gameWorld.insertCube(at: Location(x: i, y: y, z: j), color: even ? color1 : color2)
             }
         }
         
@@ -254,11 +256,19 @@ class Renderer: NSObject, MTKViewDelegate {
         
         uniforms[0].projectionMatrix = camera.projectionMatrix(aspectRatio: aspectRatio)
         
+        var objects: [GameObject] = []
+        if let cursor {
+            let cursorCube = GameObject(kind: .cube, color: SIMD4(x: 1, y: 0, z: 0, w: 1), location: SIMD3<Float>(location: cursor))
+            objects.append(cursorCube)
+        }
+        objects += gameWorld.allObjects.map({ $0.1 })
+        
         var i = 0
-        for (location, object) in gameWorld.allObjects {
+        for object in objects {
             defer { i += 1 }
 
-            let modelMatrix = matrix4x4_translation(Float(location.x), Float(location.y), Float(location.z))
+            let location = object.location
+            let modelMatrix = matrix4x4_translation(location.x, location.y, location.z)
                         
             perInstanceUniforms![i].modelViewMatrix = simd_mul(camera.viewMatrix, modelMatrix)
             
@@ -380,7 +390,6 @@ extension Renderer: MouseControlsDelegate {
     
     func mouseMoved(to viewPoint: CGPoint?, in view: UIView) {
         guard let viewPoint else {
-            print("no mouse")
             cursor = nil
             return
         }
@@ -395,19 +404,31 @@ extension Renderer: MouseControlsDelegate {
         
         let clipCoordinates = SIMD4<Float>(x: clipX, y: clipY, z: clipZ, w: clipW)
         
-        let vector4 = simd_mul(camera.projectionMatrix(aspectRatio: aspectRatio).inverse, clipCoordinates)
-        let vector = normalize(1.0 / vector4.w * SIMD3<Float>(x: vector4.x, y: vector4.y, z: vector4.z))
+        
+        let cameraSpaceVector: SIMD3<Float> = {
+            let temp = simd_mul(camera.projectionMatrix(aspectRatio: aspectRatio).inverse, clipCoordinates)
+            return normalize(1.0 / temp.w * SIMD3<Float>(x: temp.x, y: temp.y, z: temp.z))
+        }()
                 
-        let point = Float(50.0) * vector
+        let rayDirection: SIMD3<Float> = {
+            let temp = simd_mul(camera.viewMatrix.inverse, SIMD4<Float>(cameraSpaceVector, 0.0))
+            return normalize(SIMD3<Float>(x: temp.x, y: temp.y, z: temp.z))
+        }()
+
+        let ray = Ray(origin: camera.location, direction: rayDirection)
         
-        var testLocation = simd_mul(camera.viewMatrix.inverse, SIMD4<Float>(point, 1.0))
-        testLocation /= testLocation.w
-        
-        gameWorld.insertCube(at: Location(x: Int(testLocation.x.rounded()),
-                                          y: Int(testLocation.y.rounded()),
-                                          z: Int(testLocation.z.rounded())),
-                                            color: .purple)
-        
+        var nearestIntersection: Float? = nil
+        for (location, object) in gameWorld.allObjects {
+            if let (t, normal) = object.intersect(ray) {
+                guard nearestIntersection == nil || t < nearestIntersection! else { continue }
+                let point = SIMD3<Float>(location: location) + normal
+                let location = Location(x: Int(point.x.rounded()),
+                                        y: Int(point.y.rounded()),
+                                        z: Int(point.z.rounded()))
+                nearestIntersection = t
+                cursor = location
+            }
+        }
     }
 }
 
