@@ -122,18 +122,16 @@ class Renderer: NSObject, MTKViewDelegate {
             return nil
         }
         
+        let color1 = UIColor(red: 0.5, green: 0.25, blue: 0.05, alpha: 1)
+        let color2 = UIColor(red: 0.2, green: 0.5, blue: 0.3, alpha: 1)
+
         for i in -50...50 {
             for j in -50...50 {
-                gameWorld.insertCube(at: Location(x: i, y: (j+i+100) % 2, z: j))
+                let even = (j+i+100) % 2 == 0
+                gameWorld.insertCube(at: Location(x: i, y: even ? 0 : 1, z: j), color: even ? color1 : color2)
             }
         }
         
-        gameWorld.insertCube(at: Location(x: 0, y: 10, z: -70))
-        gameWorld.insertCube(at: Location(x: 10, y: 40, z: -70))
-        gameWorld.insertCube(at: Location(x: 40, y: 20, z: -70))
-
-        gameWorld.insertCube(at: Location(x: 40, y: 20, z: 70))
-
         camera.location = SIMD3(40, 50, 30)
         
         camera.look(at: SIMD3(0, 0, 0))
@@ -257,12 +255,15 @@ class Renderer: NSObject, MTKViewDelegate {
         uniforms[0].projectionMatrix = camera.projectionMatrix(aspectRatio: aspectRatio)
         
         var i = 0
-        for (location, _) in gameWorld.allObjects {
+        for (location, object) in gameWorld.allObjects {
             defer { i += 1 }
 
             let modelMatrix = matrix4x4_translation(Float(location.x), Float(location.y), Float(location.z))
                         
             perInstanceUniforms![i].modelViewMatrix = simd_mul(camera.viewMatrix, modelMatrix)
+            
+            perInstanceUniforms![i].color = object.color
+            
         }
         rotation += 0.01
     }
@@ -404,7 +405,8 @@ extension Renderer: MouseControlsDelegate {
         
         gameWorld.insertCube(at: Location(x: Int(testLocation.x.rounded()),
                                           y: Int(testLocation.y.rounded()),
-                                          z: Int(testLocation.z.rounded())))
+                                          z: Int(testLocation.z.rounded())),
+                                            color: .purple)
         
     }
 }

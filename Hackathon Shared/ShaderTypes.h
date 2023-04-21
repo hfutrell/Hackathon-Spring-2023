@@ -49,6 +49,7 @@ typedef struct
 typedef struct
 {
     matrix_float4x4 modelViewMatrix;
+    vector_float4 color;
 } PerInstanceUniforms;
 
 #endif /* ShaderTypes_h */

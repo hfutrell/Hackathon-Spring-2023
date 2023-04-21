@@ -42,7 +42,11 @@ vertex ColorInOut vertexShader(Vertex in [[stage_in]],
 
     float3 light = { 0.4, 0.8, 1.0 };
     
-    out.color = max(dot(in.normal, light), 0.0) * float3(1.0, 1.0, 1.0) + float3(0.4, 0.1, 0.0);
+    float3 lightColor = max(dot(in.normal, light), 0.0) * float3(1.0, 1.0, 1.0) + float3(0.4, 0.4, 0.4);
+    
+    float4 color = perInstanceUniforms[iid].color * float4(lightColor, 1.0);
+    
+    out.color = color.rgb;
     
     return out;
 }
